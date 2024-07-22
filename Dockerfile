@@ -5,7 +5,7 @@ FROM node:16
 WORKDIR /app
 
 #copy files.json from local to this dir
-COPY *.json .
+COPY *.json ./
 
 #install dependencies 
 RUN npm install
