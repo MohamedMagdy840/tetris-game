@@ -2,13 +2,13 @@ pipeline {
     agent any
     tools {
         jdk 'jdk17'
-        nodejs 'node16'
+        // nodejs 'node16'
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        GIT_REPO_NAME = "tetris-deployment-file" 
-        GIT_USER_NAME = "MohamedMagdy840"
-        GIT_REPO_URL  = "https://github.com/MohamedMagdy840/tetris-deployment-file.git"
+        GIT_REPO_NAME = 'tetris-deployment-file'
+        GIT_USER_NAME = 'MohamedMagdy840'
+        GIT_REPO_URL  = 'https://github.com/MohamedMagdy840/tetris-deployment-file.git'
     }
 
     stages {
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh "npm install"
+                sh 'npm install'
             }
         }
 
@@ -50,7 +50,7 @@ pipeline {
 
         stage('Trivy FS Scan') {
             steps {
-                sh "trivy fs . > trivyfs.txt"
+                sh 'trivy fs . > trivyfs.txt'
             }
         }
 
@@ -59,36 +59,35 @@ pipeline {
                 script {
                     // Login to Docker Hub
                     withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh """
+                        sh '''
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        """
+                        '''
                     }
 
                     // Build Docker image
-                    sh """
+                    sh '''
                         docker build -t tetris .
-                    """
+                    '''
 
                     // Tag Docker image with a new tag
-                    sh """
+                    sh '''
                         docker tag tetris mohamedmagdy840/tetris:latest
-                    """
+                    '''
 
                     // Push Docker image to Docker Hub
-                    sh """
+                    sh '''
                         docker push mohamedmagdy840/tetris:latest
-                    """
+                    '''
                 }
             }
         }
 
         stage('Trivy Image Scan') {
             steps {
-                sh "trivy image mohamedmagdy840/tetris:latest > trivyimage.txt"
+                sh 'trivy image mohamedmagdy840/tetris:latest > trivyimage.txt'
             }
         }
 
-    stages {
         stage('Update Deployment File') {
             steps {
                 script {
@@ -102,4 +101,4 @@ pipeline {
             }
         }
     }
-
+}
