@@ -1,0 +1,31 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tetris
+spec:
+  selector:
+    matchLabels:
+      app: tetris
+  template:
+    metadata:
+      labels:
+        app: tetris
+    spec:
+      containers:
+      - name: app-tetris
+        image: tetris-image
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tetris
+spec:
+  type: LoadBalancer 
+  selector:
+    app: tetris
+  ports:
+  - port: 80  # Example port number for external access
+    targetPort: 3000  # Assuming your application runs on port 3000 inside the container
