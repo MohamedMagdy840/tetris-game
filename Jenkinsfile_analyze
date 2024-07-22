@@ -2,15 +2,22 @@ pipeline {
     agent any
     tools {
         jdk 'jdk17'
-        // nodejs 'node16'
+        nodejs 'node16'
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        GIT_REPO_NAME = "tetris-deployment-file"
+        GIT_REPO_NAME = "tetris-deployment-file" 
         GIT_USER_NAME = "MohamedMagdy840"
+        GIT_REPO_URL  = "https://github.com/MohamedMagdy840/tetris-deployment-file.git"
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -34,12 +41,12 @@ pipeline {
             }
         }
 
-//        stage('OWASP FS Scan') {
-//            steps {
-//                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-//                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-//            }
-//        }
+        stage('OWASP FS Scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
 
         stage('Trivy FS Scan') {
             steps {
@@ -81,17 +88,18 @@ pipeline {
             }
         }
 
+    stages {
         stage('Update Deployment File') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'git-token', variable: 'GITHUB_TOKEN')]) {
+                    withCredentials([usernamePassword(credentialsId: 'git-credentials-id', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                         sh "sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml"
                         sh 'git add deployment-service.yaml'
                         sh "git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'"
-                        sh "git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
+                        sh "git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@${GIT_REPO_URL} HEAD:main"
                     }
                 }
             }
         }
     }
-}
+
