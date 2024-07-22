@@ -12,7 +12,7 @@ pipeline {
         GIT_REPO_URL  = 'https://github.com/MohamedMagdy840/tetris-deployment-file.git'
     }
 
-
+    stages {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -35,7 +35,6 @@ pipeline {
                 sh 'npm install'
             }
         }
-
 
         stage('Trivy FS Scan') {
             steps {
@@ -77,19 +76,4 @@ pipeline {
             }
         }
 
-        stage('Update Deployment File') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'git-credentials-id', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
-                        sh '''
-                            sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
-                            git add deployment-service.yaml
-                            git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
-                            git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@${GIT_REPO_URL} HEAD:main
-                        '''
-                    }
-                }
-            }
-        }
-    }
-}
+        stage
