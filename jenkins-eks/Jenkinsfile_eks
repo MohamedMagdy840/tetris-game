@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'Action', choices: ['apply', 'destroy'], description: 'Select Terraform action')
+    }
+
+    environment {
+        TERRAFORM_DIR = 'jenkins-eks'
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+    }
+
+    stages {
+        stage('Checkout from Git') {
+            steps {
+                git branch: 'main', url: 'my-repo-url'
+            }
+        }
+
+        stage('Terraform init') {
+            steps {
+                dir(TERRAFORM_DIR) {
+                    sh 'terraform init'
+                }
+            }
+        }
+
+        stage('Terraform plan') {
+            steps {
+                dir(TERRAFORM_DIR) {
+                    sh 'terraform plan'
+                }
+            }
+        }
+
+        stage('Terraform apply/destroy') {
+            steps {
+                dir(TERRAFORM_DIR) {
+                    sh "terraform ${params.Action} --auto-approve"
+                }
+            }
+        }
+    }
+}

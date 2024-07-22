@@ -1,0 +1,103 @@
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk17'
+        nodejs 'node16'
+    }
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+        GIT_REPO_NAME = "tetris-deployment-file"
+        GIT_USER_NAME = "MohamedMagdy840"
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=tetris \
+                    -Dsonar.projectKey=tetris'''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+
+        stage('OWASP FS Scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+
+        stage('Trivy FS Scan') {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+            }
+        }
+
+        stage('Docker Operations') {
+            steps {
+                script {
+                    // Login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh """
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        """
+                    }
+
+                    // Build Docker image
+                    sh """
+                        docker build -t tetris .
+                    """
+
+                    // Tag Docker image with a new tag
+                    sh """
+                        docker tag tetris mohamedmagdy840/tetris:latest
+                    """
+
+                    // Push Docker image to Docker Hub
+                    sh """
+                        docker push mohamedmagdy840/tetris:latest
+                    """
+                }
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh "trivy image mohamedmagdy840/tetris:latest > trivyimage.txt"
+            }
+        }
+
+        stage('Update Deployment File') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'git-token', variable: 'GITHUB_TOKEN')]) {
+                        sh "sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml"
+                        sh 'git add deployment-service.yaml'
+                        sh "git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'"
+                        sh "git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
+                    }
+                }
+            }
+        }
+    }
+}
