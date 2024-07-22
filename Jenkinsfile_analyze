@@ -12,12 +12,6 @@ pipeline {
         GIT_REPO_URL  = 'https://github.com/MohamedMagdy840/tetris-deployment-file.git'
     }
 
-    stages {
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
 
         stage('SonarQube Analysis') {
             steps {
