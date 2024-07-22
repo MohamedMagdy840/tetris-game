@@ -2,6 +2,7 @@ pipeline {
     agent any
     tools {
         jdk 'jdk17'
+        // Uncomment this if you need Node.js
         // nodejs 'node16'
     }
     environment {
@@ -11,12 +12,12 @@ pipeline {
         GIT_REPO_URL  = 'https://github.com/MohamedMagdy840/tetris-deployment-file.git'
     }
 
-//    stages {
-//        stage('Clean Workspace') {
-//            steps {
-//                cleanWs()
-//            }
-//        }
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
 
         stage('SonarQube Analysis') {
             steps {
@@ -41,12 +42,14 @@ pipeline {
             }
         }
 
-//        stage('OWASP FS Scan') {
-//            steps {
-//                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-//                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-//            }
-//        }
+        /* 
+        stage('OWASP FS Scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        */
 
         stage('Trivy FS Scan') {
             steps {
