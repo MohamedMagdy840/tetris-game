@@ -82,15 +82,16 @@ pipeline {
                     # Update the local deployment file
                     sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
                     
-                    # Configure Git to use the credentials for this repository
+                    # Configure Git user
                     git config user.name "Jenkins"
                     git config user.email "jenkins@jenkins.local"
+
+                    # Configure Git remote to use credentials for pushing
+                    git remote set-url origin https://$GIT_USERNAME:$GITHUB_TOKEN@github.com/MohamedMagdy840/tetris-deployment-file.git
 
                     # Add, commit, and push changes to GitHub
                     git add deployment-service.yaml
                     git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
-
-                    # Push to the remote repository using the remote name
                     git push origin main
                 '''
                     }
