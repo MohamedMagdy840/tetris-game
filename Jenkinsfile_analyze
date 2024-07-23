@@ -77,14 +77,22 @@ pipeline {
         stage('Update Deployment File') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
-                        sh '''     
-                            sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
-                            git add deployment-service.yaml
-                            git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
-                            git remote -v
-                            git push https://github.com/MohamedMagdy840/tetris-deployment-file.git HEAD:main
-                        '''
+            withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
+                sh '''
+                    # Update the local deployment file
+                    sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
+                    
+                    # Configure Git to use the credentials for this repository
+                    git config user.name "Jenkins"
+                    git config user.email "jenkins@jenkins.local"
+
+                    # Add, commit, and push changes to GitHub
+                    git add deployment-service.yaml
+                    git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
+
+                    # Push to the remote repository using the remote name
+                    git push origin main
+                '''
                     }
                 }
             }
