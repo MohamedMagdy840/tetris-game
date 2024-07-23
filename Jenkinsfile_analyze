@@ -1,3 +1,82 @@
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk17'
+        // Uncomment this if you need Node.js
+        // nodejs 'node16'
+    }
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+
+    stages {
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=tetris \
+                    -Dsonar.projectKey=tetris'''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Trivy FS Scan') {
+            steps {
+                sh 'trivy fs . > trivyfs.txt'
+            }
+        }
+
+        stage('Docker Operations') {
+            steps {
+                script {
+                    // Login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        '''
+                    }
+
+                    // Build Docker image
+                    sh '''
+                        docker build -t tetris .
+                    '''
+
+                    // Tag Docker image with a new tag
+                    sh '''
+                        docker tag tetris mohamedmagdy840/tetris:latest
+                    '''
+
+                    // Push Docker image to Docker Hub
+                    sh '''
+                        docker push mohamedmagdy840/tetris:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh 'trivy image mohamedmagdy840/tetris:latest > trivyimage.txt'
+            }
+        }
+
+
+        stage('Update Deployment File') {
+            steps {
+                script {
             withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                 sh '''
                     # Check the current branch
@@ -34,3 +113,10 @@
                     echo "Pushing changes to GitHub:"
                     git push origin main
                 '''
+
+                    }
+                }
+            }
+        }
+    }
+}
