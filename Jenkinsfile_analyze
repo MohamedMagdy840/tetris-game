@@ -89,21 +89,14 @@ pipeline {
         stage('Update Deployment File') {
             steps {
                 script {
-           withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
+            withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                 sh '''
                     # Check the current branch
                     echo "Current branch:"
                     git branch
 
-                    # Check Git status
-                    echo "Git status:"
-                    git status
-
-                    # Fetch the latest changes from the remote repository
-                    git fetch origin
-
-                    # Merge or rebase the changes
-                    git merge origin/main || git rebase origin/main
+                    # Fetch and merge the latest changes from the remote repository
+                    git pull --no-rebase origin main
 
                     # Update the local deployment file
                     sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
@@ -128,7 +121,6 @@ pipeline {
                     git remote -v
 
                     # Push changes to GitHub
-                    git pull origin main
                     echo "Pushing changes to GitHub:"
                     git push origin main
                 '''
