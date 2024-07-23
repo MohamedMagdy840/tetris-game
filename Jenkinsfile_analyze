@@ -81,6 +81,7 @@ pipeline {
                             sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
                             git add deployment-service.yaml
                             git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
+                            git pull https://${GIT_USERNAME}:${GITHUB_TOKEN}@github.com/MohamedMagdy840/tetris-deployment-file.git main
                             git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@github.com/MohamedMagdy840/tetris-deployment-file.git HEAD:main
                         '''
                     }
