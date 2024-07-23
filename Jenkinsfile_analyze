@@ -85,9 +85,9 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                         sh '''
-                            cat deployment-service.yaml
+                            
                             sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
-                            cat deployment-service.yaml
+                            
                             git add deployment-service.yaml
                             git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
                             git remote -v
