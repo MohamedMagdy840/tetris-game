@@ -7,9 +7,6 @@ pipeline {
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        GIT_REPO_NAME = 'tetris-deployment-file'
-        GIT_USER_NAME = 'MohamedMagdy840'
-        GIT_REPO_URL  = 'https://github.com/MohamedMagdy840/tetris-deployment-file.git'  // Include the protocol
     }
 
     stages {
@@ -84,7 +81,7 @@ pipeline {
                             sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
                             git add deployment-service.yaml
                             git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
-                            git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@${GIT_REPO_URL} HEAD:main
+                            git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@github.com/MohamedMagdy840/tetris-deployment-file.git HEAD:main
                         '''
                     }
                 }
