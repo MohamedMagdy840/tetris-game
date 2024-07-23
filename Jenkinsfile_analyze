@@ -17,6 +17,12 @@ pipeline {
             }
         }
 
+    stage('Checkout from Git'){
+        steps{
+             git branch: 'main', url: 'https://github.com/MohamedMagdy840/tetris-game.git'
+            }
+    }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
