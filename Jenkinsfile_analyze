@@ -79,7 +79,7 @@ pipeline {
         stage('Update Deployment File') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'git-credentials-id', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
+                    withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                         sh '''
                             sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
                             git add deployment-service.yaml
