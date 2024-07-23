@@ -92,6 +92,7 @@ pipeline {
                     # Add, commit, and push changes to GitHub
                     git add deployment-service.yaml
                     git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
+                    git log -1
                     git push origin main
                 '''
                     }
