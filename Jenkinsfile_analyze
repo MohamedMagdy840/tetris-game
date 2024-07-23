@@ -72,18 +72,26 @@ pipeline {
                 sh 'trivy image mohamedmagdy840/tetris:latest > trivyimage.txt'
             }
         }
+        stage('Checkout K8S Manifest SCM') {
+            steps {
+                git credentialsId: 'git-token',
+                    url: 'https://github.com/MohamedMagdy840/tetris-deployment-file.git',
+                    branch: 'main'
+            }
+        }
 
         stage('Update Deployment File') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
                         sh '''
+                            cat deployment-service.yaml
                             sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
+                            cat deployment-service.yaml
                             git add deployment-service.yaml
                             git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
-                            git config pull.rebase false
-                            git pull https://${GIT_USERNAME}:${GITHUB_TOKEN}@github.com/MohamedMagdy840/tetris-deployment-file.git main || git rebase --abort
-                            git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@github.com/MohamedMagdy840/tetris-deployment-file.git HEAD:main
+                            git remote -v
+                            git push https://github.com/MohamedMagdy840/tetris-deployment-file.git HEAD:main
                         '''
                     }
                 }
