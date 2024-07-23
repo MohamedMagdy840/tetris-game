@@ -11,12 +11,12 @@ pipeline {
     }
 
     stages {
-        stage('clean workspace'){
-            steps{
+        stage('clean workspace') {
+            steps {
                 cleanWs()
             }
-    }
-    stages {
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -80,47 +80,45 @@ pipeline {
             }
         }
 
-
         stage('Update Deployment File') {
             steps {
                 script {
-            withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
-                sh '''
-                    # Check the current branch
-                    echo "Current branch:"
-                    git branch
+                    withCredentials([usernamePassword(credentialsId: 'git-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
+                        sh '''
+                            # Check the current branch
+                            echo "Current branch:"
+                            git branch
 
-                    # Check Git status
-                    echo "Git status:"
-                    git status
+                            # Check Git status
+                            echo "Git status:"
+                            git status
 
-                    # Update the local deployment file
-                    sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
-                    
-                    # Configure Git user
-                    git config user.name "Jenkins"
-                    git config user.email "jenkins@jenkins.local"
+                            # Update the local deployment file
+                            sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
 
-                    # Configure Git remote to use credentials for pushing
-                    git remote set-url origin https://$GIT_USERNAME:$GITHUB_TOKEN@github.com/MohamedMagdy840/tetris-deployment-file.git
+                            # Configure Git user
+                            git config user.name "Jenkins"
+                            git config user.email "jenkins@jenkins.local"
 
-                    # Add, commit, and push changes to GitHub
-                    git add deployment-service.yaml
-                    git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
+                            # Configure Git remote to use credentials for pushing
+                            git remote set-url origin https://$GIT_USERNAME:$GITHUB_TOKEN@github.com/MohamedMagdy840/tetris-deployment-file.git
 
-                    # Check the latest commit
-                    echo "Latest commit:"
-                    git log -1
+                            # Add, commit, and push changes to GitHub
+                            git add deployment-service.yaml
+                            git commit -m 'Update deployment image to mohamedmagdy840/tetris:latest'
 
-                    # Check remote URL
-                    echo "Git remote URL:"
-                    git remote -v
+                            # Check the latest commit
+                            echo "Latest commit:"
+                            git log -1
 
-                    # Push changes to GitHub
-                    echo "Pushing changes to GitHub:"
-                    git push origin main
-                '''
+                            # Check remote URL
+                            echo "Git remote URL:"
+                            git remote -v
 
+                            # Push changes to GitHub
+                            echo "Pushing changes to GitHub:"
+                            git push origin main
+                        '''
                     }
                 }
             }
