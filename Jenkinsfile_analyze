@@ -5,15 +5,17 @@ pipeline {
         // Uncomment this if you need Node.js
         // nodejs 'node16'
     }
+
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
     }
+
     stages {
         stage('clean workspace'){
             steps{
                 cleanWs()
             }
-        }
+    }
     stages {
         stage('SonarQube Analysis') {
             steps {
