@@ -87,11 +87,11 @@ pipeline {
             }
         }
 
-//        stage('Checkout Deployment File') {
-//            steps {
-//                git branch: 'main', url: 'https://github.com/MohamedMagdy840/tetris-deployment-file.git'
-//            }
-//        }
+        stage('Checkout Deployment File') {
+            steps {
+                git branch: 'main', url: 'https://github.com/MohamedMagdy840/tetris-deployment-file.git'
+            }
+        }
 
         stage('Update Deployment File') {
             environment {
