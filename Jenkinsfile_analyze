@@ -106,11 +106,15 @@ pipeline {
                             git config user.name "jenkins"
                             sed -i 's|image: .*|image: mohamedmagdy840/tetris:latest|' deployment-service.yaml
                             
+                            # Pull latest changes from the remote repository
+                            git pull origin main
+
                             # Configure Git remote to use credentials for pushing
                             git remote set-url origin https://MohamedMagdy840:$GITHUB_TOKEN@github.com/MohamedMagdy840/tetris-deployment-file.git
                             git add deployment-service.yaml
                             git commit -m 'Update deployment image to version mohamedmagdy840/tetris:latest'
                             git push origin HEAD:main
+
                         '''
                     }
                 }
