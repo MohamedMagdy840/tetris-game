@@ -67,9 +67,4 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   role       = aws_iam_role.eks_node_group_role.name
 }
 
-#policy to can describe autoscaling
-resource "aws_iam_role_policy_attachment" "eks-cluster-autoscaler" {
-  policy_arn = "arn:aws:iam::590183792206:policy/eks-cluster-autoscaler"
-  role       = aws_iam_role.eks_node_group_role.name
-}
 
