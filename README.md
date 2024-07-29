@@ -1,5 +1,6 @@
 
   # Tetris Game Deployment 
+  ![Project Architecture](architecture.gif)
 
   ### This project aims to automate the deployment of a Tetris game application using a CI/CD pipeline with Jenkins, Docker, Amazon EC2, ECR, EKS, SonarQube, OWASP Dependency-Check, Trivy, and ArgoCD. 
   
