@@ -124,7 +124,6 @@ resource "aws_security_group" "jenkins_instance_sg" {
 #tls
 #key-pair
 #tls-private-key to add in locall
-#in userdata of bastion echo command add the file of private key in bastion file
 
 resource "tls_private_key" "keys" {
   algorithm   = "RSA"
