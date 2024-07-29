@@ -425,6 +425,26 @@ helm repo add argo https://argoproj.github.io/argo-helm
 helm install argo-cd argo/argo-cd --namespace argocd --create-namespace
 ```
 
+#### Expose argocd-server
+By default argocd-server is not publicaly exposed. For the purpose of this workshop, we will use a Load Balancer to make it usable:
+
+```bash
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+snap install jq
+export ARGOCD_SERVER=`kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname'`
+echo $ARGOCD_SERVER
+```
+#### **For username →**
+username ==admin
+
+#### **For Password →**
+
+```bash
+export ARGO_PWD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+echo $ARGO_PWD
+```
+
+
 **2. Deploy Tetris Game**:
 
 * Configure ArgoCD to deploy the Tetris game application from the deployment repository.
